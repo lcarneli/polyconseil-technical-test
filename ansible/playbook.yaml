@@ -1,0 +1,11 @@
+- name: "EKS Provisioning"
+  hosts: all
+
+  tasks:
+    - name: "Play roles"
+      ansible.builtin.include_role:
+        name: "{{ role }}"
+      loop:
+        "{{ ansible_roles }}"
+      loop_control:
+        loop_var: role
