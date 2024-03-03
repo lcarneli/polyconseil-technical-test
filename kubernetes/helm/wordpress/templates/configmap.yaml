@@ -1,0 +1,16 @@
+{{- if not .Values.config.existingConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "wordpress.fullname" . }}
+  {{- with .Values.config.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+data:
+  WORDPRESS_DB_HOST: {{ .Values.config.databaseHost | quote }}
+  WORDPRESS_DB_NAME: {{ .Values.config.databaseName | quote }}
+{{- end}}
