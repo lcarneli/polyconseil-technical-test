@@ -1,0 +1,5 @@
+### Jetbrains template
+.idea/*
+
+### VisualStudioCode template
+.vscode/*
