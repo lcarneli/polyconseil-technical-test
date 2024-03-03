@@ -1,0 +1,29 @@
+- name: "Add ingress-nginx Helm repository"
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+    force: true
+
+- name: "Copy ingress-nginx Helm values"
+  ansible.builtin.template:
+    src: values.yaml
+    dest: /tmp/ingress-nginx.values.yaml
+    force: true
+    mode: u=rw,g=r,o=r
+
+- name: "Install ingress-nginx Helm chart"
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    chart_version: "{{ ingress_nginx_chart_version }}"
+    namespace: ingress-nginx
+    create_namespace: true
+    values_files:
+      - /tmp/ingress-nginx.values.yaml
+
+- name: "Wait ingress-nginx deployment"
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: ingress-nginx-controller
+    namespace: ingress-nginx
+    wait: true

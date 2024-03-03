@@ -1,0 +1,4 @@
+- name: "Download eks config"
+  ansible.builtin.command: "aws eks update-kubeconfig --region {{ eks_region }} --name {{ eks_cluster_name }}"
+  args:
+    creates: ~/.kube/config
