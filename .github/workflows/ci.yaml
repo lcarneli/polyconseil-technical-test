@@ -1,0 +1,92 @@
+name: "Continuous Integration"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - ".gitignore"
+      - "README.md"
+
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".gitignore"
+      - "README.md"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  terraform-fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Run Terraform Fmt
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Run Terraform Init
+        run: terraform init
+        working-directory: terraform
+
+      - name: Run Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+
+  ansible-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+
+      - name: Setup Ansible Lint
+        run: pip3 install ansible-lint
+
+      - name: Install Ansible collections
+        run: ansible-galaxy install -r collections/requirements.yaml
+        working-directory: ansible
+
+      - name: Run Ansible Lint
+        run: ansible-lint
+        working-directory: ansible
+
+  helm-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Run Helm Lint
+        run: helm lint
+        working-directory: kubernetes/helm/wordpress
