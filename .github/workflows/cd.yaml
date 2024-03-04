@@ -1,0 +1,66 @@
+name: "Continuous Deployment"
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".gitignore"
+      - "README.md"
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  AWS_REGION: "eu-west-3"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_customer_name: "polyconseil"
+      TF_VAR_project_name: "demo"
+      TF_VAR_vpc_availability_zones: "2"
+      TF_VAR_vpc_cidr_block: "10.0.0.0/16"
+      TF_VAR_vpc_cidr_bits: "8"
+      TF_VAR_eks_cluster_version: "1.29"
+      TF_VAR_eks_cluster_public_access_cidrs: '["0.0.0.0/0"]'
+      TF_VAR_eks_node_group_ami_type: "AL2_x86_64"
+      TF_VAR_eks_node_group_capacity_type: "ON_DEMAND"
+      TF_VAR_eks_node_group_instance_types: '["t3.medium"]'
+      TF_VAR_eks_node_group_disk_size: "20"
+      TF_VAR_eks_node_group_desired_size: "1"
+      TF_VAR_eks_node_group_max_size : "1"
+      TF_VAR_eks_node_group_min_size: "1"
+      TF_VAR_eks_ebs_csi_driver_version: "v1.28.0-eksbuild.1"
+      TF_VAR_rds_instance_class: "db.t3.small"
+      TF_VAR_rds_allocated_storage: "5"
+      TF_VAR_rds_engine: "mariadb"
+      TF_VAR_rds_engine_version: "10.11"
+      TF_VAR_rds_db_name: "demo"
+      TF_VAR_rds_username: ${{ secrets.RDS_USERNAME }}
+      TF_VAR_rds_password: ${{ secrets.RDS_PASSWORD }}
+      TF_VAR_rds_skip_final_snapshot: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Run Terraform Init
+        run: terraform init
+        working-directory: terraform
+
+      - name: Run Terraform Plan
+        run: terraform plan -out=tfplan -input=false
+        working-directory: terraform
+
+      - name: Run Terraform Apply
+        run: terraform apply -auto-approve -input=false tfplan
+        working-directory: terraform
