@@ -1,0 +1,29 @@
+- name: "Add polyconseil-demo Helm repository"
+  kubernetes.core.helm_repository:
+    name: polyconseil-demo
+    repo_url: https://raw.githubusercontent.com/lcarneli/polyconseil-technical-test/main/kubernetes/helm
+    force: true
+
+- name: "Copy wordpress Helm values"
+  ansible.builtin.template:
+    src: values.yaml
+    dest: /tmp/wordpress.values.yaml
+    force: true
+    mode: u=rw,g=r,o=r
+
+- name: "Install wordpress Helm chart"
+  kubernetes.core.helm:
+    name: wordpress
+    chart_ref: polyconseil-demo/wordpress
+    chart_version: "{{ wordpress_chart_version }}"
+    namespace: wordpress
+    create_namespace: true
+    values_files:
+      - /tmp/wordpress.values.yaml
+
+- name: "Wait wordpress deployment"
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: wordpress
+    namespace: wordpress
+    wait: true

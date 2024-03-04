@@ -3,3 +3,11 @@
 
 ### VisualStudioCode template
 .vscode/*
+
+### Ansible
+ansible/env.yaml
+
+### Terraform
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars

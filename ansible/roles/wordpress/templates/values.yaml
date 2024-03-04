@@ -1,0 +1,73 @@
+# Default values for wordpress.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+fullnameOverride: ""
+nameOverride: ""
+
+deploymentAnnotations: {}
+
+replicaCount: 1
+
+podAnnotations: {}
+podLabels: {}
+
+imagePullSecrets: []
+
+image:
+  repository: "wordpress"
+  pullPolicy: "IfNotPresent"
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+config:
+  existingConfig: ""
+  annotations: {}
+
+  databaseHost: "{{ wordpress_database_host }}"
+  databaseName: "{{ wordpress_database_name }}"
+
+secret:
+  existingSecret: ""
+  annotations: {}
+
+  databaseUsername: "{{ wordpress_database_username }}"
+  databasePassword: "{{ wordpress_database_password }}"
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  annotations: {}
+
+  storageClassName: "gp2"
+  accessMode: "ReadWriteOnce"
+  size: "{{ wordpress_persistence_size }}"
+
+service:
+  annotations: {}
+
+  type: "ClusterIP"
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+  hosts:
+    - host: "{{ wordpress_ingress_host }}"
+      paths:
+        - path: "/"
+          pathType: "Prefix"
+  tls:
+    - hosts:
+        - "{{ wordpress_ingress_host }}"
+      secretName: "wordpress-tls"
