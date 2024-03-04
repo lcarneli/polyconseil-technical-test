@@ -40,7 +40,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_eip" "main" {
-  vpc = true
+  domain = "vpc"
 
   tags = {
     "Name" = "${var.customer_name}-${var.project_name}"

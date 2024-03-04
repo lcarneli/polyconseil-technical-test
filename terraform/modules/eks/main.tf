@@ -1,20 +1,19 @@
 resource "aws_iam_role" "eks_cluster" {
   name = "${var.customer_name}-${var.project_name}-eks-cluster"
 
-  assume_role_policy = <<POLICY
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "eks.amazonaws.com"
-        },
-        "Action": "sts:AssumeRole"
-      }
-    ]
-  }
-  POLICY
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "eks.amazonaws.com"
+          },
+          "Action" : "sts:AssumeRole"
+        }
+      ]
+  })
 
   tags = {
     "Name" = "${var.customer_name}-${var.project_name}-eks-cluster"
@@ -48,20 +47,19 @@ resource "aws_eks_cluster" "main" {
 resource "aws_iam_role" "eks_nodes" {
   name = "${var.customer_name}-${var.project_name}-eks-nodes"
 
-  assume_role_policy = <<POLICY
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "ec2.amazonaws.com"
-        },
-        "Action": "sts:AssumeRole"
-      }
-    ]
-  }
-  POLICY
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          },
+          "Action" : "sts:AssumeRole"
+        }
+      ]
+  })
 
   tags = {
     "Name" = "${var.customer_name}-${var.project_name}-eks-nodes"
